@@ -10,7 +10,7 @@ import time
 from dataset.dataset import dataset
 from models.net import net
 from loss import loss
-os.environ['CUDA_VISIBLE_DEVICES']='1'
+os.environ['CUDA_VISIBLE_DEVICES']='0'
 
 def compute_accuracy(predicted, labels):
     for i in range(3):
