@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as transforms
 from PIL import Image
 import matplotlib.pyplot as plt
-
+os.environ['CUDA_VISIBLE_DEVICES']='0'
 class ThermalDataset(Dataset):
     """Custom Dataset for thermal images"""
     
@@ -43,7 +43,7 @@ class ThermalDataset(Dataset):
 def test_data_loading():
     """Test the data loading functionality"""
     
-    data_path = 'dataset/ICAS/'
+    data_path = './dataset/ICAS'
     
     # Check if dataset exists
     if not os.path.exists(data_path):

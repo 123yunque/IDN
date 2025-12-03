@@ -12,7 +12,8 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-
+import os
+os.environ['CUDA_VISIBLE_DEVICES']='0'
 # Sample Data Transforms Implementation
 def get_data_transforms_solution():
     """Sample implementation of data transforms"""
