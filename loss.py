@@ -5,6 +5,9 @@ class loss(nn.Module):
     def __init__(self):
         super(loss, self).__init__()
         self.bce_loss = nn.BCELoss()
+         # 类别权重：根据样本比例（647:303）设置，少数类权重更高
+        pos_weight = torch.tensor([647/303])  # 正类（ICAS）权重
+        self.bce_loss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)  # 替换原有BCE
 
     
     def forward(self, x, y, z, label):

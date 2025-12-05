@@ -46,12 +46,9 @@ class net(nn.Module):
 
         return out
 
-if __name__ == '__main__':
-    net = net()
-    x = torch.ones(1, 3, 32, 32)
-    y = torch.ones(1, 3, 32, 32)
-    x_ = torch.ones(1, 3, 32, 32)
-    y_ = torch.ones(1, 3, 32, 32)
-    out_1, out_2, out_3 = net(x, y, x_, y_)
-    # vgg = torchvision.models.vgg13()
-    # print(vgg)
+# if __name__ == '__main__':
+#     net = net()
+#     # 生成单输入张量（假设输入格式为 [batch_size, channels, height, width]）
+#     input_tensor = torch.ones(1, 6, 32, 32)  # 这里使用6通道是因为原代码中会拆分half
+#     out_1, out_2, out_3 = net(input_tensor)  # 仅传入1个输入参数
+#     print(f"Output shapes: {out_1.shape}, {out_2.shape}, {out_3.shape}")
