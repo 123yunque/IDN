@@ -16,14 +16,14 @@ class net(nn.Module):
             nn.ReLU(inplace=True),
             nn.Dropout(0.5),  # 针对小样本的过拟合防护
             nn.Linear(256, 1),
-            nn.Sigmoid()
+            # nn.Sigmoid()
     )
 
     def forward(self, inputs):
         # 移除原双通道拆分逻辑，直接使用完整3通道输入
         # 生成输入的" inverse "版本（用于对比学习）
-        inputs_inverse = 255.0 - inputs  # 对RGB图像做反相处理（保持3通道）
-
+        # inputs_inverse = 255.0 - inputs  # 对RGB图像做反相处理（保持3通道）
+        inputs_inverse = 1 - inputs
         # 共享stream网络提取特征（输入为3通道）
         feat, feat_inv = self.stream(inputs, inputs_inverse)
 

@@ -19,34 +19,62 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 cuda = torch.cuda.is_available()
 
+# def compute_metrics(predicted, labels):
+#     # 将元组转换为列表，方便修改
+#     predicted_list = list(predicted)
+    
+#     # 对每个输出进行二值化处理（>0.5 视为 1，否则为 0）
+#     for i in range(3):
+#         predicted_list[i] = (predicted_list[i] > 0.5).float()
+    
+#     # 融合三个输出的结果
+#     predicted_combined = predicted_list[0] + predicted_list[1] + predicted_list[2]
+#     predicted_combined[predicted_combined < 2] = 0
+#     predicted_combined[predicted_combined >= 2] = 1
+#     predicted_combined = predicted_combined.view(-1).cpu().numpy()
+    
+#     # 转换标签为 numpy 数组
+#     labels_np = labels.view(-1).cpu().numpy()
+    
+#     # 计算指标，添加zero_division参数处理无正样本情况
+#     acc = (predicted_combined == labels_np).mean()
+#     prec = precision_score(labels_np, predicted_combined, zero_division=0)
+#     rec = recall_score(labels_np, predicted_combined, zero_division=0)
+#     f1 = f1_score(labels_np, predicted_combined, zero_division=0)
+    
+#     return acc, prec, rec, f1
 def compute_metrics(predicted, labels):
     # 将元组转换为列表，方便修改
     predicted_list = list(predicted)
     
-    # 对每个输出进行二值化处理（>0.5 视为 1，否则为 0）
+    # 对每个输出进行二值化处理
+    # 【关键修改】：假设您已经移除了模型(net.py)末尾的 Sigmoid，此时输出为 Logits。
+    # Logits > 0 等价于 Probability > 0.5。
+    # 如果您没有修改模型结构（仍保留Sigmoid），请务必先去 models/net.py 删除那一行。
     for i in range(3):
-        predicted_list[i] = (predicted_list[i] > 0.5).float()
+        predicted_list[i] = (predicted_list[i] > 0).float()
     
-    # 融合三个输出的结果
+    # 融合三个输出的结果（投票机制：3个分支中 >= 2 票认为是正类）
     predicted_combined = predicted_list[0] + predicted_list[1] + predicted_list[2]
+    # 小于2票置为0
     predicted_combined[predicted_combined < 2] = 0
+    # 大于等于2票置为1
     predicted_combined[predicted_combined >= 2] = 1
-    predicted_combined = predicted_combined.view(-1).cpu().numpy()
     
-    # 转换标签为 numpy 数组
+    # 转换为 numpy 数组以便计算 sklearn 指标
+    predicted_combined = predicted_combined.view(-1).cpu().numpy()
     labels_np = labels.view(-1).cpu().numpy()
     
-    # 计算指标，添加zero_division参数处理无正样本情况
+    # 计算指标，保留 zero_division 参数处理无正样本情况
     acc = (predicted_combined == labels_np).mean()
     prec = precision_score(labels_np, predicted_combined, zero_division=0)
     rec = recall_score(labels_np, predicted_combined, zero_division=0)
     f1 = f1_score(labels_np, predicted_combined, zero_division=0)
     
     return acc, prec, rec, f1
-
 def train_model():
     # 超参数设置
-    BATCH_SIZE = 16
+    BATCH_SIZE = 8
     EPOCHS = 50
     LEARNING_RATE = 1e-4
     WEIGHT_DECAY = 1e-4
@@ -62,18 +90,18 @@ def train_model():
     # 数据变换
     from torchvision import transforms
     train_transform = transforms.Compose([
-        transforms.Resize((224, 224)),
+        transforms.Resize((512, 512)),
         transforms.RandomHorizontalFlip(p=0.5),
         transforms.RandomRotation(15),
         transforms.ColorJitter(brightness=0.2, contrast=0.2),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
     val_transform = transforms.Compose([
-        transforms.Resize((224, 224)),
+        transforms.Resize((512, 512)),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
     # 初始化数据集
@@ -122,7 +150,7 @@ def train_model():
     timestamp = time.strftime("%m-%d-%H-%M", time.localtime())
     writer = SummaryWriter(log_dir=f'runs/thermal_{timestamp}')
     best_val_f1 = 0.0
-    os.makedirs('saved_models', exist_ok=True)
+    os.makedirs('saved_models_12_6', exist_ok=True)
 
     # 训练循环
     for epoch in range(1, EPOCHS + 1):

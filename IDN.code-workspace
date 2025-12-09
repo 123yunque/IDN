@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "dataset",
+			"path": "dataset/ICAS"
+		},
+		{
+			"path": "../ICAS_diagnosis"
+		},
+		{
+			"path": "../cam"
+		}
+	],
+	"settings": {}
+}
